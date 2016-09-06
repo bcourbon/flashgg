@@ -1,0 +1,6 @@
+{
+    "processes" : {
+	"DY" : ["/DYToEE_NNPDF30_13TeV-powheg-pythia8"]
+    },	
+    "cmdLine" : "campaign=RunIIFall15DR76"
+}

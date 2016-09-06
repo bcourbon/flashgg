@@ -1,0 +1,7 @@
+{
+    "processes" : {
+        "ggh_125" : [ "/GluGluHToGG_M-125_13TeV_powheg_pythia8" ],
+        "vbf_125" : [ "/VBFHToGG_M-125_13TeV_powheg_pythia8" ]		
+    },	
+    "cmdLine" : "campaign=RunIIFall15DR76"
+}

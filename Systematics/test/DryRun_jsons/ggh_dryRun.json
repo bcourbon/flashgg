@@ -1,0 +1,10 @@
+{
+    "processes" : {
+        "ggh_70" : [ "/GluGluHToGG_M70_13TeV_amcatnloFXFX_pythia8" ],
+        "ggh_80" : [ "/GluGluHToGG_M80_13TeV_amcatnloFXFX_pythia8" ],
+        "ggh_90" : [ "/GluGluHToGG_M90_13TeV_amcatnloFXFX_pythia8" ],
+        "ggh_100" : [ "/GluGluHToGG_M100_13TeV_amcatnloFXFX_pythia8" ],
+        "ggh_110" : [ "/GluGluHToGG_M110_13TeV_amcatnloFXFX_pythia8" ]	
+    },	
+    "cmdLine" : "campaign=RunIIFall15DR76"
+}

@@ -1,0 +1,10 @@
+{
+    "processes" : {
+        "VBF_70" : [ "/VBFHToGG_M70_13TeV_amcatnlo_pythia8 " ],
+        "VBF_80" : [ "/VBFHToGG_M80_13TeV_amcatnlo_pythia8 " ],
+        "VBF_90" : [ "/VBFHToGG_M90_13TeV_amcatnlo_pythia8 " ],
+        "VBF_100" : [ "/VBFHToGG_M100_13TeV_amcatnlo_pythia8 " ],
+        "VBF_110" : [ "/VBFHToGG_M110_13TeV_amcatnlo_pythia8 " ]		
+    },	
+    "cmdLine" : "campaign=RunIIFall15DR76"
+}

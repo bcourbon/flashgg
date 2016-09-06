@@ -1,0 +1,14 @@
+{
+    "processes" : {
+	"GJet" : ["/Gjet_Pt-20toInf_DoubleEMEnriched_MGG-40to80_TuneCUETP8M1_13TeV_Pythia8",
+		  "/Gjet_Pt-20to40_DoubleEMEnriched_MGG-80toInf_TuneCUETP8M1_13TeV_Pythia8",
+		  "/Gjet_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCUETP8M1_13TeV_Pythia8"],
+	"QCD" : ["/QCD_Pt-30toInf_DoubleEMEnriched_MGG-40to80_TuneCUETP8M1_13TeV_Pythia8",
+		 "/QCD_Pt-30to40_DoubleEMEnriched_MGG-80toInf_TuneCUETP8M1_13TeV_Pythia8",
+		 "/QCD_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCUETP8M1_13TeV_Pythia8"],
+	"DiPho" : ["/DiPhotonJetsBox_M40_80-Sherpa ",
+		   "/DiPhotonJetsBox_MGG-80toInf_13TeV-Sherpa",
+		   "/DiPhotonJets_MGG-80toInf_13TeV_amcatnloFXFX_pythia8"]
+    },	
+    "cmdLine" : "campaign=RunIIFall15DR76"
+}
