@@ -14,7 +14,7 @@ namespace flashgg {
         TTHHadronicTag();
         TTHHadronicTag( edm::Ptr<DiPhotonCandidate>, edm::Ptr<DiPhotonMVAResult>, std::vector<edm::Ptr<flashgg::Jet> >, std::vector<edm::Ptr<flashgg::Jet> > );
         TTHHadronicTag( edm::Ptr<DiPhotonCandidate>, DiPhotonMVAResult, std::vector<edm::Ptr<flashgg::Jet> >, std::vector<edm::Ptr<flashgg::Jet> > );
-        TTHHadronicTag *clone() const override { return ( new TTHHadronicTag( *this ) ); }
+        TTHHadronicTag *clone() const { return ( new TTHHadronicTag( *this ) ); }
         ~TTHHadronicTag();
 
         const std::vector<edm::Ptr<flashgg::Jet> > jetVector() const {return theJetVec_;}
@@ -23,8 +23,6 @@ namespace flashgg {
         int nBMedium() const {return Nbtagmedium_;}
         void setNBLoose( int nb ) { Nbtagloose_ = nb; }
         void setNBMedium( int nb ) { Nbtagmedium_ = nb; }
-
-        DiPhotonTagBase::tag_t tagEnum() const override {return DiPhotonTagBase::kTTHHadronic; }
 
     private:
         int Nbtagloose_;

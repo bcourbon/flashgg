@@ -2,17 +2,37 @@ import FWCore.ParameterSet.Config as cms
 
 def setModules(process, options):
 
-    process.sampleInfo = cms.EDProducer("tnp::FlashggSampleInfoTree",
+    process.sampleInfo = cms.EDAnalyzer("tnp::SampleInfoTree",
+                                        vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
+                                        genInfo = cms.InputTag("generator")
                                         )
 
     from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
     process.hltFilter = hltHighLevel.clone()
-    process.hltFilter.throw = cms.bool(False)
+    process.hltFilter.throw = cms.bool(True)
     process.hltFilter.HLTPaths = options['TnPPATHS']
     
-    from PhysicsTools.TagAndProbe.pileupConfiguration_cfi import pileupProducer
-    process.pileupReweightingProducer = pileupProducer.clone()    
-
+    process.pileupReweightingProducer = cms.EDProducer("PileupWeightProducer",
+                                                       hardcodedWeights = cms.untracked.bool(True)
+                                                       )
+    
+    process.GsfDRToNearestTauProbe = cms.EDProducer("DeltaRNearestGenPComputer",
+                                                    probes = cms.InputTag("photonFromDiPhotons"),
+                                                    objects = cms.InputTag('flashggPrunedGenParticles'),
+                                                    objectSelection = cms.string("abs(pdgId)==15"),
+                                                    )
+    
+    process.GsfDRToNearestTauSC = cms.EDProducer("DeltaRNearestGenPComputer",
+                                                 probes = cms.InputTag("superClusterCands"),
+                                                 objects = cms.InputTag('flashggPrunedGenParticles'),
+                                                 objectSelection = cms.string("abs(pdgId)==15"),
+                                                 )
+    
+    process.GsfDRToNearestTauTag = cms.EDProducer("DeltaRNearestGenPComputer",
+                                                  probes = cms.InputTag("photonFromDiPhotons"),
+                                                  objects = cms.InputTag('flashggPrunedGenParticles'),
+                                                  objectSelection = cms.string("abs(pdgId)==15"),
+                                                  )
     ###################################################################
     ## ELECTRON MODULES
     ###################################################################
@@ -24,7 +44,7 @@ def setModules(process, options):
                                                  subleadingPreselection = cms.string(options['SUBLEADING_PRESELECTION']),
                                                  vertexSelection = cms.int32(-1), # -1 means take the chosen vertex, otherwise use the index to select 2it
                                                  diPhotonMVATag = cms.InputTag("flashggDiPhotonMVA"),
-                                                 diphotonMVAThreshold = cms.double(-1.0)
+                                                 diphotonMVAThreshold = cms.double(-0.6)
                                                  )
 
     process.goodPhotonTagL1 = cms.EDProducer("FlashggPhotonL1CandProducer",
@@ -59,21 +79,21 @@ def setModules(process, options):
                                                    input     = cms.InputTag("goodPhotonProbes"),
                                                    cut       = cms.string(options['PHOTON_CUTS']),
                                                    selection = cms.InputTag("photonFromDiPhotons:idmva"),
-                                                   id_cut    = cms.double(-0.9)
+                                                   id_cut    = cms.double(0.2)
                                                    )
     
     process.goodPhotonTagsIDMVA = cms.EDProducer("FlashggPhotonSelectorByDoubleValueMap",
                                                  input     = cms.InputTag("goodPhotonTags"),
                                                  cut       = cms.string(options['PHOTON_CUTS']),
                                                  selection = cms.InputTag("photonFromDiPhotons:idmva"),
-                                                 id_cut    = cms.double(0.0)
+                                                 id_cut    = cms.double(0.2)
                                                  )
     
     ###################################################################
 
     process.goodPhotonsTagHLT = cms.EDProducer("FlashggPhotonTriggerCandProducer",
                                                filterNames = options['TnPHLTTagFilters'],
-                                               inputs      = cms.InputTag("goodPhotonTagsIDMVA"),
+                                               inputs      = cms.InputTag("goodPhotonTags"),
                                                bits        = cms.InputTag('TriggerResults::HLT'),
                                                objects     = cms.InputTag('selectedPatTrigger'),
                                                dR          = cms.double(0.3),
@@ -106,7 +126,26 @@ def setModules(process, options):
     process.tagTightRECO = cms.EDProducer("CandViewShallowCloneCombiner",
                                       decay = cms.string("goodPhotonsTagHLT goodPhotonsProbeHLT"), 
                                       checkCharge = cms.bool(False),
-                                      cut = cms.string("40<mass<130"),
+                                      cut = cms.string("40<mass<1000"),
                                       )
 
     
+    ###################################################################
+    ## MC MATCHING
+    ###################################################################
+
+    process.McMatchTag = cms.EDProducer("MCTruthDeltaRMatcherNew",
+                                        matchPDGId = cms.vint32(11),
+                                        src = cms.InputTag("goodPhotonTags"),
+                                        distMin = cms.double(0.2),
+                                        matched = cms.InputTag("flashggPrunedGenParticles"),
+                                        checkCharge = cms.bool(False)
+                                        )
+    
+    process.McMatchRECO = cms.EDProducer("MCTruthDeltaRMatcherNew",
+                                         matchPDGId = cms.vint32(11),
+                                         src = cms.InputTag("goodPhotonProbes"),
+                                         distMin = cms.double(0.2),
+                                         matched = cms.InputTag("flashggPrunedGenParticles"),
+                                         checkCharge = cms.bool(False)
+                                         )

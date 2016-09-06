@@ -1,6 +1,3 @@
-#ifndef flashgg_UntaggedTag
-#define flashgg_UntaggedTag
-
 #include "flashgg/DataFormats/interface/DiPhotonTagBase.h"
 
 namespace flashgg {
@@ -13,8 +10,7 @@ namespace flashgg {
 
         UntaggedTag( edm::Ptr<DiPhotonCandidate>, DiPhotonMVAResult );
         UntaggedTag( edm::Ptr<DiPhotonCandidate>, edm::Ptr<DiPhotonMVAResult> );
-        virtual UntaggedTag *clone() const override;
-        DiPhotonTagBase::tag_t tagEnum() const override {return DiPhotonTagBase::kUntagged; }
+        virtual UntaggedTag *clone() const;
 
     private:
 
@@ -22,8 +18,6 @@ namespace flashgg {
 
     };
 }
-
-#endif
 // Local Variables:
 // mode:c++
 // indent-tabs-mode:nil

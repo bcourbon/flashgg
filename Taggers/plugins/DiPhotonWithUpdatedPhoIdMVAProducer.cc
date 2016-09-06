@@ -1,4 +1,3 @@
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -28,8 +27,7 @@ namespace flashgg {
         edm::FileInPath phoIdMVAweightfileEB_, phoIdMVAweightfileEE_, correctionFile_;
         bool correctInputs_;
         bool debug_;
-        //        std::vector<TGraph*> corrections_;
-        std::vector<std::unique_ptr<TGraph> > corrections_;
+        std::vector<TGraph*> corrections_;
     };
 
     DiPhotonWithUpdatedPhoIdMVAProducer::DiPhotonWithUpdatedPhoIdMVAProducer( const edm::ParameterSet &ps ) :
@@ -45,12 +43,9 @@ namespace flashgg {
         if (correctInputs_) {
             correctionFile_ = ps.getParameter<edm::FileInPath>( "correctionFile" );
             TFile* f = TFile::Open(correctionFile_.fullPath().c_str());
-            corrections_.emplace_back((TGraph*)((TGraph*) f->Get("transffull5x5R9EB"))->Clone() );
-            corrections_.emplace_back((TGraph*)((TGraph*) f->Get("transfEtaWidthEB"))->Clone() );
-            corrections_.emplace_back((TGraph*)((TGraph*) f->Get("transfS4EB"))->Clone() );
-            corrections_.emplace_back((TGraph*)((TGraph*) f->Get("transffull5x5R9EE"))->Clone() );
-            corrections_.emplace_back((TGraph*)((TGraph*) f->Get("transfEtaWidthEE"))->Clone() );
-            corrections_.emplace_back((TGraph*)((TGraph*) f->Get("transfS4EE"))->Clone() );
+            corrections_.push_back((TGraph*) f->Get("transffull5x5R9EB"));
+            corrections_.push_back((TGraph*) f->Get("transfEtaWidthEB"));
+            corrections_.push_back((TGraph*) f->Get("transfS4EB"));
             f->Close();
         }
 
@@ -82,7 +77,6 @@ namespace flashgg {
                     newShowerShapes.e3x3 = corrections_[0]->Eval(new_obj->getLeadingPhoton().full5x5_r9())*new_obj->getLeadingPhoton().superCluster()->rawEnergy();
                     new_obj->getLeadingPhoton().full5x5_setShowerShapeVariables(newShowerShapes);
                     leadCorrectedEtaWidth = corrections_[1]->Eval(new_obj->getLeadingPhoton().superCluster()->etaWidth());
-                    new_obj->getLeadingPhoton().getSuperCluster()->setEtaWidth(leadCorrectedEtaWidth);
                     new_obj->getLeadingPhoton().setS4(corrections_[2]->Eval(new_obj->getLeadingPhoton().s4()));
 
                     if (this->debug_) {
@@ -96,35 +90,7 @@ namespace flashgg {
                     newShowerShapes.e3x3 = corrections_[0]->Eval(new_obj->getSubLeadingPhoton().full5x5_r9())*new_obj->getSubLeadingPhoton().superCluster()->rawEnergy();
                     new_obj->getSubLeadingPhoton().full5x5_setShowerShapeVariables(newShowerShapes);
                     subLeadCorrectedEtaWidth = corrections_[1]->Eval(new_obj->getSubLeadingPhoton().superCluster()->etaWidth());
-                    new_obj->getSubLeadingPhoton().getSuperCluster()->setEtaWidth(subLeadCorrectedEtaWidth);
                     new_obj->getSubLeadingPhoton().setS4(corrections_[2]->Eval(new_obj->getSubLeadingPhoton().s4()));
-                }
-
-                if (new_obj->getLeadingPhoton().isEE()) {
-                    if (this->debug_) {
-                        std::cout << new_obj->getLeadingPhoton().full5x5_r9() << std::endl;
-                        std::cout << new_obj->getLeadingPhoton().r9() << std::endl;
-                    }
-                    reco::Photon::ShowerShape newShowerShapes = new_obj->getLeadingPhoton().full5x5_showerShapeVariables();
-                    newShowerShapes.e3x3 = corrections_[3]->Eval(new_obj->getLeadingPhoton().full5x5_r9())*new_obj->getLeadingPhoton().superCluster()->rawEnergy();
-                    new_obj->getLeadingPhoton().full5x5_setShowerShapeVariables(newShowerShapes);
-                    leadCorrectedEtaWidth = corrections_[4]->Eval(new_obj->getLeadingPhoton().superCluster()->etaWidth());
-                    new_obj->getLeadingPhoton().getSuperCluster()->setEtaWidth(leadCorrectedEtaWidth);
-                    new_obj->getLeadingPhoton().setS4(corrections_[5]->Eval(new_obj->getLeadingPhoton().s4()));
-
-                    if (this->debug_) {
-                        std::cout << new_obj->getLeadingPhoton().full5x5_r9() << std::endl;
-                        std::cout << new_obj->getLeadingPhoton().r9() << std::endl;
-                    }
-                }
-                
-                if (new_obj->getSubLeadingPhoton().isEE()) {
-                    reco::Photon::ShowerShape newShowerShapes = new_obj->getSubLeadingPhoton().full5x5_showerShapeVariables();
-                    newShowerShapes.e3x3 = corrections_[3]->Eval(new_obj->getSubLeadingPhoton().full5x5_r9())*new_obj->getSubLeadingPhoton().superCluster()->rawEnergy();
-                    new_obj->getSubLeadingPhoton().full5x5_setShowerShapeVariables(newShowerShapes);
-                    subLeadCorrectedEtaWidth = corrections_[4]->Eval(new_obj->getSubLeadingPhoton().superCluster()->etaWidth());
-                    new_obj->getSubLeadingPhoton().getSuperCluster()->setEtaWidth(subLeadCorrectedEtaWidth);
-                    new_obj->getSubLeadingPhoton().setS4(corrections_[5]->Eval(new_obj->getSubLeadingPhoton().s4()));
                 }
             }
 
@@ -139,7 +105,6 @@ namespace flashgg {
                 std::cout << " Output DiPhoton lead (sublead) MVA: " << new_obj->leadPhotonId() << " " << new_obj->subLeadPhotonId() << std::endl;
             }
             out_obj->push_back(*new_obj);
-            delete new_obj;
         }
         evt.put(out_obj);
     }

@@ -17,7 +17,7 @@ namespace flashgg {
 
         ~TTHLeptonicTag();
 
-        TTHLeptonicTag *clone() const override { return ( new TTHLeptonicTag( *this ) ); }
+        TTHLeptonicTag *clone() const { return ( new TTHLeptonicTag( *this ) ); }
 
         const std::vector<edm::Ptr<Muon> > muons() const { return Muons_;}
         const std::vector<edm::Ptr<flashgg::Electron> > electrons() const {return Electrons_;}
@@ -28,8 +28,6 @@ namespace flashgg {
         void setBJets( std::vector<edm::Ptr<Jet> > BJets )  { BJets_ = BJets;}
         void setMuons( std::vector<edm::Ptr<Muon> > Muons ) {Muons_ = Muons;}
         void setElectrons( std::vector<edm::Ptr<Electron> > Electrons ) {Electrons_ = Electrons;}
-
-        DiPhotonTagBase::tag_t tagEnum() const override {return DiPhotonTagBase::kTTHLeptonic; }
 
     private:
         std::vector<edm::Ptr<Muon> > Muons_;

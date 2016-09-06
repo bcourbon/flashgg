@@ -13,17 +13,17 @@ FlashggBTagCalibration calib("CSVv2", CSVfilename);
 
 FlashggBTagCalibrationReader readerBC(&calib,               // calibration instance
                                FlashggBTagEntry::OP_MEDIUM,  // operating point
-                               "comb",               // measurement type
+                               "mujets",               // measurement type
                                "central");           // systematics type
-FlashggBTagCalibrationReader readerBC_up(&calib, FlashggBTagEntry::OP_MEDIUM, "comb", "up");  // sys up
-FlashggBTagCalibrationReader readerBC_do(&calib, FlashggBTagEntry::OP_MEDIUM, "comb", "down");  // sys down
+FlashggBTagCalibrationReader readerBC_up(&calib, FlashggBTagEntry::OP_MEDIUM, "mujets", "up");  // sys up
+FlashggBTagCalibrationReader readerBC_do(&calib, FlashggBTagEntry::OP_MEDIUM, "mujets", "down");  // sys down
 
 FlashggBTagCalibrationReader readerUDSG(&calib,               // calibration instance
                              FlashggBTagEntry::OP_MEDIUM,  // operating point
-                             "incl",               // measurement type
+                             "comb",               // measurement type
                              "central");           // systematics type
-FlashggBTagCalibrationReader readerUDSG_up(&calib, FlashggBTagEntry::OP_MEDIUM, "incl", "up");  // sys up
-FlashggBTagCalibrationReader readerUDSG_do(&calib, FlashggBTagEntry::OP_MEDIUM, "incl", "down");  // sys down
+FlashggBTagCalibrationReader readerUDSG_up(&calib, FlashggBTagEntry::OP_MEDIUM, "comb", "up");  // sys up
+FlashggBTagCalibrationReader readerUDSG_do(&calib, FlashggBTagEntry::OP_MEDIUM, "comb", "down");  // sys down
 
 namespace flashgg {
 
@@ -106,8 +106,7 @@ namespace flashgg {
             //obtaining scale factors
 
             //https://twiki.cern.ch/twiki/bin/view/CMS/BTagCalibration
-            float MaxBJetPt = 669.99, MaxLJetPt = 999.99;
-            float MinBJetPt = 30.01, MinLJetPt = 20.01;
+            float MaxBJetPt = 670., MaxLJetPt = 1000.;
             float JetPt = obj.pt();
             float JetEta = obj.eta();
             int JetFlav = obj.hadronFlavour();
@@ -120,19 +119,11 @@ namespace flashgg {
                     JetPt = MaxBJetPt; 
                     DoubleUncertainty = true;
                 }  
-                if(JetPt<MinBJetPt)  {
-                    JetPt = MinBJetPt;   
-                    DoubleUncertainty = true;
-                }
             } else { // for light jets
                 if(JetPt>MaxLJetPt)  {
                     JetPt = MaxLJetPt; 
                     DoubleUncertainty = true;
                 } 
-                if(JetPt<MinLJetPt)  {
-                    JetPt = MinLJetPt;   
-                    DoubleUncertainty = true;
-                }
             }
 
             if( this->debug_ ) {

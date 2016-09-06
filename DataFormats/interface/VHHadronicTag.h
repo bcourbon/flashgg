@@ -15,7 +15,7 @@ namespace flashgg {
         VHHadronicTag();
         VHHadronicTag( edm::Ptr<DiPhotonCandidate>, DiPhotonMVAResult );
         VHHadronicTag( edm::Ptr<DiPhotonCandidate>, edm::Ptr<DiPhotonMVAResult> );
-        VHHadronicTag *clone() const override;
+        VHHadronicTag *clone() const;
         ~VHHadronicTag();
 
         const edm::Ptr<flashgg::Jet>      leadingJet()  const  { return leadingJet_; }
@@ -24,8 +24,6 @@ namespace flashgg {
         //const edm::Ptr<DiPhotonMVAResult> diPhotonMVAResult() const { return theDiPhotonMVAResult_;} // doesn't work for some reason
 
         void setJets( edm::Ptr<flashgg::Jet>, edm::Ptr<flashgg::Jet> );
-
-        DiPhotonTagBase::tag_t tagEnum() const override {return DiPhotonTagBase::kVHHadronic; }
 
     private:
         edm::Ptr<DiPhotonCandidate> theDiPhotonCandidate_;

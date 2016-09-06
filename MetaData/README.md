@@ -93,103 +93,6 @@ In fact, it is recommended to set up a new area from scratch and checkout the ta
 
 https://twiki.cern.ch/twiki/bin/viewauth/CMS/FLASHggFramework#Instructions_for_users  
 
-### SRING16 (80x)
-
-#### 80X with DY including PDFs
-
-cd $CMSSW_BASE/src/flashgg/MetaData/work
-./prepareCrabJobs.py -C RunIISpring16DR80X-2_2_0-25ns_DYWithPDF -U 5 -L 25 -s campaigns/RunIISpring16DR80X-2_2_0-25ns_DYWithPDF.json -V 2_2_0 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py
-cd RunIISpring16DR80X-2_2_0-25ns_DYWithPDF 
-echo crabConfig_*.py | xargs -n 1 crab sub
-
-#### 80X MiniAODv2
-
-Tags for flashgg: `2_2_0` and `RunIISpring16DR80X-2_2_0-25ns_ICHEP16_MiniAODv2`
-
-```
-cd $CMSSW_BASE/src/flashgg/MetaData/work
-# split the campaign json file into sig and (data + bkg) to use different options for file splitting
-./prepareCrabJobs.py -C RunIISpring16DR80X-2_2_0-25ns_ICHEP16_MiniAODv2 -U 1 -L 25 -s campaigns/RunIISpring16DR80X-2_2_0-25ns_ICHEP16_MiniAODv2_sig.json -V 2_2_0 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py --lumiMask ${PWD}/jsons/json_DCSONLY_1467860596_for_ICHEP_MiniAODv2.txt
-./prepareCrabJobs.py -C RunIISpring16DR80X-2_2_0-25ns_ICHEP16_MiniAODv2 -U 5 -L 25 -s campaigns/RunIISpring16DR80X-
-2_2_0-25ns_ICHEP16_MiniAODv2_data_bkg.json -V 2_2_0 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py --lumiMask ${PWD}/jsons/json_DCSONLY_1467860596_for_ICHEP_MiniAODv2.txt
-cd RunIISpring16DR80X-2_2_0-25ns_ICHEP16_MiniAODv2
-echo crabConfig_*.py | xargs -n 1 crab sub
-```
-
-#### 80X QGL update
-
-Tags for flashgg: `2_1_0` and `RunIISpring16DR80X-2_1_0-25ns_ICHEP16`
-
-```
-cd $CMSSW_BASE/src/flashgg/MetaData/work
-./prepareCrabJobs.py -C RunIISpring16DR80X-2_1_2-25ns_ICHEP16 -U 5 -L 25 -s campaigns/RunIISpring16DR80X-2_1_2-25ns_ICHEP16.json -V 2_1_2 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py --lumiMask ${PWD}/jsons/json_DCSONLY_1466185760.txt
-cd RunIISpring16DR80X-2_1_2-25ns_ICHEP16
-echo crabConfig_*.py | xargs -n 1 crab sub
-```
-
-
-#### 80X Pu Jet ID update 
-
-Tags for flashgg: `2_1_0` and `RunIISpring16DR80X-2_1_0-25ns_ICHEP16`
-
-```
-cd $CMSSW_BASE/src/flashgg/MetaData/work
-./prepareCrabJobs.py -C RunIISpring16DR80X-2_1_1-25ns_ICHEP16 -U 5 -L 25 -s campaigns/RunIISpring16DR80X-2_1_1-25ns_ICHEP16.json -V 2_1_1 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py --lumiMask ${PWD}/jsons/json_DCSONLY_1466185760.txt
-cd RunIISpring16DR80X-2_1_1-25ns_ICHEP16
-echo crabConfig_*.py | xargs -n 1 crab sub
-```
-
-#### 80X trainings on 80X
-
-Example of top-up submission for data samples. The campaign is called p2
-(part2) and the corresponding catalog will be merged to the main one as soon as
-finished.
-Tags for flashgg: `2_1_0` and `RunIISpring16DR80X-2_1_0-25ns_ICHEP16_p2`
-Latest JSON available taken from the central CMS afs area: `json_DCSONLY_1467118709_for_ICHEPp2.txt`
-
-```
-cd $CMSSW_BASE/src/flashgg/MetaData/work
-# make one campaign file per dataset:
-#   campaigns/RunIISpring16DR80X-2_1_0-25ns_ICHEP16_{DoubleEG,SingleElectron,DoubleMuon,SingleMuon}.json
-for dset in DoubleEG SingleElectron DoubleMuon SingleMuon
-do
-        fggManageSamples.py -C RunIISpring16DR80X-2_1_0-25ns_ICHEP16 getlumi /${dset}* output=${dset}_p1_done.json
-        compareJSON.py --sub jsons/json_DCSONLY_1467118709_for_ICHEPp2.txt ${dset}_p1_done.json jsons/RunIISpring16DR80X-2_1_0-25ns_ICHEP16_p2_${dset}.json
-mkdir orig ; mv crabConfig_*orig*.py orig
-        ./prepareCrabJobs.py -C RunIISpring16DR80X-2_1_0-25ns_ICHEP16_p2 -U 5 -L 25 -s campaigns/RunIISpring16DR80X-2_1_0-25ns_ICHEP16_${dset}.json -V 2_1_0 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py --lumiMask ${PWD}/jsons/RunIISpring16DR80X-2_1_0-25ns_ICHEP16_p2_${dset}.json
-done
-cd RunIISpring16DR80X-2_1_0-25ns_ICHEP16_p2
-echo crabConfig_*.py | xargs -n 1 crab sub
-
-for dset in DoubleEG SingleElectron DoubleMuon SingleMuon
-do
-        fggManageSamples.py -C RunIISpring16DR80X-2_1_0-25ns_ICHEP16 catimport RunIISpring16DR80X-2_1_0-25ns_ICHEP16_p2 "/${dset}*"
-        fggManageSamples.py -C RunIISpring16DR80X-2_1_0-25ns_ICHEP16 overlap "/${dset}*"
-done
-```
-
-Tags for flashgg: `2_1_0` and `RunIISpring16DR80X-2_1_0-25ns_ICHEP16`
-
-```
-cd $CMSSW_BASE/src/flashgg/MetaData/work
-./prepareCrabJobs.py -C RunIISpring16DR80X-2_1_0-25ns_ICHEP16 -U 5 -L 25 -s campaigns/RunIISpring16DR80X-2_1_0-25ns_ICHEP16.json -V 2_1_0 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py --lumiMask ${PWD}/jsons/json_DCSONLY_1466185760.txt
-cd RunIISpring16DR80X-2_1_0-25ns_ICHEP16
-python $CMSSW_BASE/src/flashgg/MetaData/scripts/stupid_fix.py
-mkdir orig ; mv crabConfig_*orig*.py orig
-echo crabConfig_*.py | xargs -n 1 crab sub
-```
-
-#### 76X trainings on 80X, 2_0_0
-
-```
-cd $CMSSW_BASE/src/flashgg/MetaData/work
-./prepareCrabJobs.py -C RunIISpring16DR80X-2_0_0-25ns -U 5 -L 25 -s campaigns/RunIISpring16DR80X-2_0_0-25ns.json -V 2_0_0 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py --lumiMask ${PWD}/jsons/json_DCSONLY.txt
-cd RunIISpring16DR80X-2_0_0-25ns/
-python $CMSSW_BASE/src/flashgg/MetaData/scripts/stupid_fix.py
-mkdir orig ; mv crabConfig_*orig*.py orig
-echo crabConfig_*.py | xargs -n 1 crab sub
-```
-
 ### FALL15 (76x)
 
 #### First tests with 1_3_1
@@ -218,7 +121,6 @@ echo crabConfig_*.py | xargs -n 1 crab sub
 
 ### 1_2_0 Missing ReReco DoubleEG ###
 
-```
 cd $CMSSW_BASE/src/flashgg/MetaData/work/jsons
 fggManageSamples.py -C RunIISpring15-ReReco74X-All-1_1_0-Or-1_2_0-25ns getlumi "/DoubleEG/*2015*/*" output=DoubleEG_ReRecoAsRun_29Jan.json
 compareJSON.py --sub Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_Silver_v2.txt DoubleEG_ReRecoAsRun_29Jan.json > DoubleEG_ToRun_29Jan.json
@@ -227,12 +129,10 @@ cd $CMSSW_BASE/src/flashgg/MetaData/work
 ./prepareCrabJobs.py -C RunIISpring15-ReReco74XMissingDoubleEG-1_2_0-25ns -s campaigns/RunIISpring15-ReReco74XMissingDoubleEG-1_2_0-25ns.json  -V 1_2_0 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py --lumiMask ${PWD}/jsons/DoubleEG_ToRun_29Jan.json
 cd RunIISpring15-ReReco74XMissingDoubleEG-1_2_0-25ns
 echo crabConfig_*.py | xargs -n 1 crab sub
-```
 
 
 ### 1_2_0 Missing ReReco SingleElectron ###
 
-```
 cd $CMSSW_BASE/src/flashgg/MetaData/work/jsons
 fggManageSamples.py -C RunIISpring15-ReReco74X-All-1_1_0-Or-1_2_0-25ns getlumi "/SingleElectron/*2015*/*" output=SingleElectron_ReRecoAsRun_29Jan.json
 compareJSON.py --sub Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_Silver_v2.txt SingleElectron_ReRecoAsRun_29Jan.json > SingleElectron_ToRun_29Jan.json
@@ -241,18 +141,15 @@ cd $CMSSW_BASE/src/flashgg/MetaData/work
 ./prepareCrabJobs.py -C RunIISpring15-ReReco74XMissingSingleElectron-1_2_0-25ns -s campaigns/RunIISpring15-ReReco74XMissingSingleElectron-1_2_0-25ns.json  -V 1_2_0 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py --lumiMask ${PWD}/jsons/SingleElectron_ToRun_29Jan.json
 cd RunIISpring15-ReReco74XMissingSingleElectron-1_2_0-25ns
 echo crabConfig_*.py | xargs -n 1 crab sub
-```
 
 ### 1_2_0 ReMiniAOD missing signal samples
 
-```
 cd $CMSSW_BASE/src/flashgg/MetaData/work
 ./prepareCrabJobs.py -C RunIISpring15-MoreSignal-1_2_0-25ns -U 1 -L 25 -s campaigns/RunIISpring15-MoreSignal-1_2_0-25ns.json -V 1_2_0 -p ${CMSSW_BASE}/src/flashgg/MicroAOD/test/microAODstd.py
 cd RunIISpring15-MoreSignal-1_2_0-25ns
 python $CMSSW_BASE/src/flashgg/MetaData/scripts/stupid_fix.py
 mkdir orig ; mv crabConfig_*orig*.py orig
 echo crabConfig_*.py | xargs -n 1 crab sub
-```
 
 
 #### 1_2_0 ReMiniAOD TTH Filtered Rerun

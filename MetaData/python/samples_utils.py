@@ -4,8 +4,6 @@ from das_client import get_data as das_query
 
 from pprint import pprint
 
-from hashlib import sha256
-
 import os,json,fcntl,sys
 from parallel  import *
 from threading import Semaphore
@@ -119,7 +117,7 @@ class SamplesManager(object):
             if "*" in dataset:
                 # response = das_query("https://cmsweb.cern.ch","dataset dataset=%s | grep dataset.name" % dataset, 0, 0, False, self.dbs_instance_, ckey=x509(), cert=x509())
                 # response = das_query("https://cmsweb.cern.ch","dataset dataset=%s instance=%s | grep dataset.name" % (dataset, self.dbs_instance_), 0, 0, False, ckey=x509(), cert=x509())
-                response = das_query("https://cmsweb.cern.ch","dataset dataset=%s instance=%s | grep dataset.name" % (dataset, self.dbs_instance_), 0, 0, False, ckey=x509(), cert=x509())
+                response = das_query("https://cmsweb.cern.ch","dataset dataset=%s instance=%s | grep dataset.name" % (dataset, self.dbs_instance_), 0, 0, False)
                 ## print response
                 for d in response["data"]:
                     ## print d
@@ -145,7 +143,7 @@ class SamplesManager(object):
         @dsetName: dataset name
         """
         ## response = das_query("https://cmsweb.cern.ch","file dataset=%s | grep file.name,file.nevents" % dsetName, 0, 0, False, self.dbs_instance_, ckey=x509(), cert=x509())
-        response = das_query("https://cmsweb.cern.ch","file dataset=%s instance=%s | grep file.name,file.nevents" % (dsetName,self.dbs_instance_), 0, 0, False, ckey=x509(), cert=x509())
+        response = das_query("https://cmsweb.cern.ch","file dataset=%s instance=%s | grep file.name,file.nevents" % (dsetName,self.dbs_instance_), 0, 0, False, )
         
         files=[]
         for d in response["data"]:
@@ -213,7 +211,7 @@ class SamplesManager(object):
         ret,out = self.parallel_.run("/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select",["find",dsetName],interactive=True)[2]
         files = []
         for line in out.split("\n"):
-            if line.endswith(".root") and not "failed" in line:
+            if line.endswith(".root"):
                 files.append( {"name":line.replace("/eos/cms",""), "nevents":0} )
 
         return files
@@ -403,15 +401,13 @@ class SamplesManager(object):
         if writeCatalog:
             self.writeCatalog(catalog)
 
-    def reviewCatalog(self, pattern=None):
+    def reviewCatalog(self):
         datasets,catalog = self.getAllDatasets()
 
         primaries = {}
         keepAll = False
         dataregex = re.compile("Run[0-9]+[A-Z]")
         for d in datasets:
-            if pattern and not fnmatch(d, pattern):
-                continue
             if not keepAll:
                 reply = ask_user("keep this dataset (yes/no/all)?\n %s\n" % d, ["y","n","a"])
                 if reply == "n":
@@ -445,16 +441,6 @@ class SamplesManager(object):
         
     def mergeDataset(self,dst,merge):
         dst["vetted"]=False
-        
-        from FWCore.PythonUtilities.LumiList import LumiList
-        dstLumisToSkip = LumiList(compactList=dst.get('lumisToSkip',{}))
-        mergeLumisToSkip = LumiList(compactList=merge.get('lumisToSkip',{}))
-        dstLumisToSkip += mergeLumisToSkip
-        dstLumisToSkip = dstLumisToSkip.compactList
-        if len(dstLumisToSkip) > 0:
-            dst['lumisToSkip'] = dstLumisToSkip
-            print "\nWARNING: Merged lumisToSkip list. It is reccomended to run the 'overlap' command to re-geneate the list from scratch."
-        
         dstFiles=dst["files"]
         mergeFiles=merge["files"]
         for fil in mergeFiles:
@@ -481,7 +467,7 @@ class SamplesManager(object):
         @fileName: file name
         """
         fName = fileName
-        tmp = ".tmp%s_%d.json"%(sha256(dsetName).hexdigest(),ifile)
+        tmp = ".tmp%s_%d.json"%(dsetName.replace("/","_"),ifile)
         if self.continue_:
             if os.path.exists(tmp):
                 print "%s already exists" % tmp
@@ -532,24 +518,12 @@ class SamplesManager(object):
         return 0
         ## return dsetName,ifile,fileName,ret,out
     
-    def getDatasetLumiList(self,name,catalog,check=False):
+    def getDatasetLumiList(self,name,catalog):
         from FWCore.PythonUtilities.LumiList import LumiList
 
-        lumisToSkip = catalog[name].get('lumisToSkip',None)
-        if lumisToSkip:
-            print "Dataset %s has list of lumi sections to skip in catalog" % name
-            lumisToSkip = LumiList(compactList=lumisToSkip)
         dlist = LumiList()
         for fil in catalog[name]["files"]:
             flist = LumiList( runsAndLumis=fil.get("lumis",{}) )
-            if lumisToSkip and not check:
-                flist = flist.__sub__(lumisToSkip)
-            if check:
-                andlist = dlist.__and__(flist)
-                ## print andlist,  fil.get("name")
-                if len(andlist) != 0:
-                    print "Warning: duplicate lumi sections in dataset. %s" % fil.get("name")
-                    print andlist, flist
             dlist += flist
         
         return dlist
@@ -561,7 +535,7 @@ class SamplesManager(object):
         for dataset in catalog.keys():
             for arg in args:
                 if dataset == arg or fnmatch(dataset,arg):
-                    datasets[dataset] = self.getDatasetLumiList(dataset,catalog,check=True)
+                    datasets[dataset] = self.getDatasetLumiList(dataset,catalog)
                     break
         
         keys = datasets.keys()
@@ -570,29 +544,9 @@ class SamplesManager(object):
                 overlap = datasets[ikey].__and__(datasets[jkey])
                 print ikey
                 print jkey
-                overlaps = overlap.compactList
-                print overlaps
-                if len(overlaps) > 0:
-                    for key in ikey,jkey:
-                        reply=ask_user("\nMask lumi sections in\n %s (yes/no)? " % key,["y","n"])
-                        if reply == 'y': 
-                            catalog[key]["lumisToSkip"] = overlaps
-                            break
-                        
-        print "Writing catalog"
-        self.writeCatalog(catalog)
-        print "Done"
-
-
-    def getLumisToSkip(self,dataset):
-        catalog = self.readCatalog(True)
-        if not dataset in catalog:
-            return None
-
-        from FWCore.PythonUtilities.LumiList import LumiList
+                print overlap.compactList
+            
         
-        return LumiList( compactList=catalog[dataset].get('lumisToSkip',{}) )
-    
 
     def getLumiList(self,*args):
         
@@ -612,20 +566,19 @@ class SamplesManager(object):
         
 
         if len(output) > 0:
-            output = output[0].replace("output=","")
+            output = output[0].strip("output=")
         else:
             output = None
             
         from FWCore.PythonUtilities.LumiList import LumiList
         fulist = LumiList()
         for dataset in datasets:
-            ## dlist = LumiList()
-            dlist = self.getDatasetLumiList(dataset,catalog)
+            dlist = LumiList()
             jsonout = dataset.lstrip("/").rstrip("/").replace("/","_")+".json"
-            ### for fil in catalog[dataset]["files"]:
-            ###     flist = LumiList( runsAndLumis=fil.get("lumis",{}) )
-            ###     ## print flist
-            ###     dlist += flist
+            for fil in catalog[dataset]["files"]:
+                flist = LumiList( runsAndLumis=fil.get("lumis",{}) )
+                ## print flist
+                dlist += flist
             if not output:
                 with open(jsonout,"w+") as fout:
                     fout.write(json.dumps(dlist.compactList,sort_keys=True))
@@ -688,12 +641,11 @@ class SamplesManager(object):
         
         """
         catalog = self.readCatalog(True)
-        print primary
         primary = primary.lstrip("/")
         if "/" in primary:
             primary,secondary,tier = primary.split("/")
         found = False
-        xsec  = None
+        xsec  = 0.
         allFiles = []
         totEvents = 0.
         totWeights = 0.
@@ -895,7 +847,7 @@ Commands:
         slim_datasets = []
         for d in datasets:
             empty,prim,sec,tier = d.split("/")
-            if not self.options.verbose and len(sec) > maxSec:
+            if len(sec) > maxSec:
                 sec = sec[0:firstHalf]+".."+sec[-secondHalf:-1]
             slim_datasets.append("/%s/%s/%s" % ( prim, sec, tier ) )
         ## datasets = slim_datasets
@@ -934,5 +886,5 @@ Commands:
     def run_clear(self):
         self.mn.clearCatalog()
     
-    def run_review(self, pattern=None):
-        self.mn.reviewCatalog(pattern)
+    def run_review(self):
+        self.mn.reviewCatalog()

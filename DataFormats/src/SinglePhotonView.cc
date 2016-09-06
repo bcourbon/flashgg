@@ -37,7 +37,6 @@ namespace flashgg {
     {
         if( !persistVec_.size() ) {
             MakePhoton();
-            pho_.embedSuperCluster();
             persistVec_.push_back( pho_ );
         }
     }

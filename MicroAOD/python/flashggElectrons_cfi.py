@@ -7,15 +7,12 @@ process = cms.Process("FLASHggMicroAOD")
 # turn on VID producer, indicate data format  to be
 # DataFormat.AOD or DataFormat.MiniAOD, as appropriate 
 
-
 dataFormat = DataFormat.MiniAOD
 
 switchOnVIDElectronIdProducer(process, dataFormat)
 
 # define which IDs we want to produce
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_nonTrig_V1_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV60_cff']
+my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_nonTrig_V1_cff']
 
 #add them to the VID producer
 for idmod in my_id_modules:
@@ -33,24 +30,6 @@ flashggElectrons = cms.EDProducer('FlashggElectronProducer',
                 mvaValuesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values"),
                 effAreasConfigFile = cms.FileInPath("RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_25ns.txt"),
   		eleMVAMediumIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring15-25ns-nonTrig-V1-wp90"),
-                eleMVATightIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring15-25ns-nonTrig-V1-wp80"),
-                eleVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),   
-                eleLooseIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
-                eleMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-medium"),
-                eleTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
-                eleHEEPIdMap = cms.InputTag("egmGsfElectronIDs:heepElectronID-HEEPV60"),
-		pfCandidatesTag = cms.InputTag("packedPFCandidates"),
+                eleMVATightIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring15-25ns-nonTrig-V1-wp80")
 
-		elecminiso_r_min = cms.double(0.05),
-		elecminiso_r_max = cms.double(0.2),
-		elecminiso_kt_scale = cms.double(10.0),
-		elecEBminiso_deadcone_ch = cms.double(0.0),
-		elecEBminiso_deadcone_pu = cms.double(0.0),
-		elecEBminiso_deadcone_ph = cms.double(0.0),
-		elecEBminiso_deadcone_nh = cms.double(0.0),
-		elecEEminiso_deadcone_ch = cms.double(0.015),
-                elecEEminiso_deadcone_pu = cms.double(0.015),
-                elecEEminiso_deadcone_ph = cms.double(0.08),
-                elecEEminiso_deadcone_nh = cms.double(0.0),
-		elecminiso_ptThresh = cms.double(0.0)
 		)

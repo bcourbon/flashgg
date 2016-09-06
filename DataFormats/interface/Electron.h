@@ -24,40 +24,12 @@ namespace flashgg {
         bool hasMatchedConversion() const { return hasMatchedConversion_; }
         void setHasMatchedConversion( bool val ) { hasMatchedConversion_ = val;}
 
-        bool passMVATightId( ) const {return passMVATightId_ ;}
-        void setPassMVATightId( bool val ) { passMVATightId_ = val;}
-        
-        bool passMVAMediumId( ) const {return passMVAMediumId_ ;}
-        void setPassMVAMediumId( bool val ) { passMVAMediumId_ = val;}
-
-        bool passTightId( ) const {return passTightId_ ;}
-        void setPassTightId( bool val ) { passTightId_ = val;}
-        
-        bool passMediumId( ) const {return passMediumId_ ;}
-        void setPassMediumId( bool val ) { passMediumId_ = val;}
-
-        bool passLooseId( ) const {return passLooseId_ ;}
-        void setPassLooseId( bool val ) { passLooseId_ = val;}
-
-        bool passVetoId( ) const {return passVetoId_ ;}
-        void setPassVetoId( bool val ) { passVetoId_ = val;}
-
-        float fggMiniIsoSumRel() const {return fggMiniIsoSumRel_;}
-        void setFggMiniIsoSumRel( float val ) {fggMiniIsoSumRel_ = val;}
-
         Electron *clone() const { return ( new Electron( *this ) ); }
 
     private:
         float nontrigmva_;
         float PfRhoAreaCorrectedIso_;
         bool hasMatchedConversion_;
-        bool passMVATightId_;
-        bool passMVAMediumId_;
-        bool passTightId_;
-        bool passMediumId_;
-        bool passLooseId_;
-        bool passVetoId_;
-        float fggMiniIsoSumRel_;
     };
 }
 

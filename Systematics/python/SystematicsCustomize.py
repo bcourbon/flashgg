@@ -8,15 +8,6 @@ def printSystematicInfo(process):
     print (14*"-"+" DUMPING SYSTEMATIC OVERVIEW "+14*"-")
     print "%20s %15s %20s" % ("Systematic","Central value?","Systematic shifts?")
     print 57*"-"
-    printSystematicVPSet(vpsetlist)
-    print (13*"-"+" DUMPING 2D SYSTEMATIC OVERVIEW "+12*"-")
-    print "%20s %15s %20s" % ("Systematic","Central value?","Systematic shifts?")
-    print 57*"-"
-    vpsetlist2D  = [process.flashggDiPhotonSystematics.SystMethods2D, process.flashggMuonSystematics.SystMethods2D, process.flashggElectronSystematics.SystMethods2D]
-    vpsetlist2D += [process.flashggJetSystematics0.SystMethods2D]
-    printSystematicVPSet(vpsetlist2D)
-
-def printSystematicVPSet(vpsetlist):
     for vpset in vpsetlist:
         for pset in vpset:
 #            if detailed:
@@ -31,24 +22,13 @@ def printSystematicVPSet(vpsetlist):
                 cv = "NO"
             sigmalist = pset.NSigmas.value()    
             sig = ""
-            sig2 = ""
-            if type(sigmalist) == type([]) and len(sigmalist) > 0:
+            if len(sigmalist) > 0:
                 for val in sigmalist:
                     sig += "%i " % val
-            elif type(sigmalist) == type(cms.PSet()) and (len(sigmalist.firstVar) > 0 or len(sigmalist.secondVar) > 0):
-                sig += "1st: "
-                for val in sigmalist.firstVar:
-                    sig += "%i " % val
-                sig2 += "2nd: "
-                for val in sigmalist.secondVar:
-                        sig2 += "%i " % val
             else:    
                 sig += "NO"
             print "%20s %15s %20s" % (syst,cv,sig)
-            if (sig2 != ""):
-                print "%20s %15s %20s" % ("","",sig2)
-        if len(vpset):
-            print 57*"-"
+        print 57*"-"
 
 
 def createStandardSystematicsProducers(process):
@@ -73,9 +53,7 @@ def modifyTagSequenceForSystematics(process,jetSystematicsInputTags,ZPlusJetMode
     for i in range(len(jetSystematicsInputTags)):
         massSearchReplaceAnyInputTag(process.flashggTagSequence,UnpackedJetCollectionVInputTag[i],jetSystematicsInputTags[i])
 
-    if ZPlusJetMode == 2:  # VBF    
-        process.flashggSystTagMerger = cms.EDProducer("VBFTagMerger",src=cms.VInputTag("flashggVBFTag"))
-    elif ZPlusJetMode:    
+    if ZPlusJetMode:    
         process.flashggSystTagMerger = cms.EDProducer("ZPlusJetTagMerger",src=cms.VInputTag("flashggZPlusJetTag"))
     else:
         process.flashggSystTagMerger = cms.EDProducer("TagMerger",src=cms.VInputTag("flashggTagSorter"))
@@ -97,9 +75,7 @@ def cloneTagSequenceForEachSystematic(process,systlabels,phosystlabels,jetsystla
             if hasattr(module,"SystLabel"):
                 module.SystLabel = systlabel
         process.systematicsTagSequences += newseq
-        if ZPlusJetMode == 2:
-            process.flashggSystTagMerger.src.append(cms.InputTag("flashggVBFTag" + systlabel))
-        elif ZPlusJetMode:
+        if ZPlusJetMode:
             process.flashggSystTagMerger.src.append(cms.InputTag("flashggZPlusJetTag" + systlabel))
         else:
             process.flashggSystTagMerger.src.append(cms.InputTag("flashggTagSorter" + systlabel))
@@ -126,14 +102,9 @@ def customizeSystematicsForBackground(process):
     from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
     vpsetlist = [process.flashggDiPhotonSystematics.SystMethods, process.flashggMuonSystematics.SystMethods, process.flashggElectronSystematics.SystMethods]
     vpsetlist += [getattr(process,"flashggJetSystematics%i"%i).SystMethods for i in range(len(UnpackedJetCollectionVInputTag))]
-    vpsetlist += [process.flashggDiPhotonSystematics.SystMethods2D, process.flashggMuonSystematics.SystMethods2D, process.flashggElectronSystematics.SystMethods2D]
-    vpsetlist += [getattr(process,"flashggJetSystematics%i"%i).SystMethods2D for i in range(len(UnpackedJetCollectionVInputTag))]
     for vpset in vpsetlist:
         for pset in vpset:
-            if type(pset.NSigmas) == type(cms.vint32()):
-                pset.NSigmas = cms.vint32() # Do not perform shift
-            else:
-                pset.NSigmas = cms.PSet( firstVar = cms.vint32(), secondVar = cms.vint32() ) # Do not perform shift - 2D case
+            pset.NSigmas = cms.vint32()
             if hasattr(pset,"SetupUncertainties"):
                 pset.SetupUncertainties = False
 
@@ -142,30 +113,24 @@ def customizeSystematicsForData(process):
     customizeLeptonSystematicsForData(process)
     customizeJetSystematicsForData(process)
 
-def customizeVPSetForData(systs, phScaleBins):
-    newvpset = cms.VPSet()
-    for pset in systs:
-        if pset.Label.value().count("Scale") or pset.Label.value().count("SigmaEOverESmearing"):
-            pset.ApplyCentralValue = cms.bool(True) # Turn on central shift for data (it is off for MC)
-            if type(pset.NSigmas) == type(cms.vint32()):
-                pset.NSigmas = cms.vint32() # Do not perform shift
-            else:
-                pset.NSigmas = cms.PSet( firstVar = cms.vint32(), secondVar = cms.vint32() ) # Do not perform shift - 2D case
-            if pset.Label.value().count("Scale") and phScaleBins != None: 
-                pset.BinList = phScaleBins
-            newvpset += [pset]
-    return newvpset
-
 def customizePhotonSystematicsForData(process):
     # By default remove the systematic entirely (central value and shifts)
     # For scale: put in central value, but omit shifts
     # TODO: this is wrong for sigE/E and possibly others - check!
 
     photonScaleBinsData = getattr(process,'photonScaleBinsData',None)
-    if hasattr(process,'photonScaleBinsData'):
-        print photonScaleBinsData, process.photonScaleBinsData
-    process.flashggDiPhotonSystematics.SystMethods = customizeVPSetForData(process.flashggDiPhotonSystematics.SystMethods, photonScaleBinsData)
-    process.flashggDiPhotonSystematics.SystMethods2D = customizeVPSetForData(process.flashggDiPhotonSystematics.SystMethods2D, photonScaleBinsData)
+    print photonScaleBinsData, process.photonScaleBinsData
+    newvpset = cms.VPSet()
+    for pset in process.flashggDiPhotonSystematics.SystMethods:
+        if pset.Label.value().count("Scale") or pset.Label.value().count("SigmaEOverESmearing"):
+            pset.ApplyCentralValue = cms.bool(True) # Turn on central shift for data (it is off for MC)
+            pset.NSigmas = cms.vint32() # Do not perform shift
+            if pset.Label.value().count("Scale") and photonScaleBinsData != None: 
+                pset.BinList = photonScaleBinsData 
+            newvpset += [pset]
+        if pset.Label.value().count("SigmaEOverESmearing"):
+            newvpset += [pset]
+    process.flashggDiPhotonSystematics.SystMethods = newvpset
 
 def customizeLeptonSystematicsForData(process):
     # Remove systematics entirely
@@ -177,8 +142,7 @@ def customizeLeptonSystematicsForData(process):
 def customizeJetSystematicsForData(process):
     # By default remove the systematic entirely
     # For JEC, re-do central value in case the global tag has been updated
-    process.jec.toGet[0].tag = cms.string(process.jec.toGet[0].tag.value().replace("MC","DATA"))
-    process.jec.connect = cms.string(process.jec.connect.value().replace("MC","DATA"))
+
     from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
     jetsystprodlist = [getattr(process,"flashggJetSystematics%i"%i) for i in range(len(UnpackedJetCollectionVInputTag))]
     for systprod in jetsystprodlist:
@@ -195,23 +159,3 @@ def customizeJetSystematicsForData(process):
         process.load("JetMETCorrections/Configuration/JetCorrectionServices_cff")
     process.jetCorrectorChain = cms.Sequence(process.ak4PFCHSL1FastL2L3ResidualCorrectorChain)
 
-def useEGMTools(process):
-    # remove old scales
-    for isyst in [ process.MCScaleHighR9EB, process.MCScaleLowR9EB, process.MCScaleHighR9EE, process.MCScaleLowR9EE ]:
-        process.flashggDiPhotonSystematics.SystMethods.remove(isyst)
-
-    # add EGM scales
-    for isyst in [ process.MCScaleHighR9EB_EGM, process.MCScaleLowR9EB_EGM, process.MCScaleHighR9EE_EGM, process.MCScaleLowR9EE_EGM ]:
-        process.flashggDiPhotonSystematics.SystMethods.insert(0, isyst)
-
-    # remove old smearings
-    for isyst in [ process.MCSmearHighR9EE, process.MCSmearLowR9EE, process.MCSmearHighR9EB, process.MCSmearLowR9EB, process.SigmaEOverESmearing ]:
-        process.flashggDiPhotonSystematics.SystMethods.remove(isyst)
-
-    # add EGM smearings (2D)
-    process.flashggDiPhotonSystematics.SystMethods2D.extend([
-            process.MCSmearHighR9EE_EGM,
-            process.MCSmearLowR9EE_EGM,
-            process.MCSmearHighR9EB_EGM,
-            process.MCSmearLowR9EB_EGM,
-            process.SigmaEOverESmearing_EGM])

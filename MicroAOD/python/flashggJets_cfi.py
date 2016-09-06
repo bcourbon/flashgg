@@ -11,8 +11,7 @@ import os
 
 flashggBTag = 'pfCombinedInclusiveSecondaryVertexV2BJetTags'
 maxJetCollections = 8
-#qgDatabaseVersion = 'v1' # check https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
-qgDatabaseVersion = '80X'
+qgDatabaseVersion = 'v1' # check https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
 
 def addFlashggPFCHSJets(process, 
                         isData,
@@ -95,15 +94,13 @@ def addFlashggPFCHSJets(process,
   #process.patJetCorrFactorsAK4PFCHSLeg.primaryVertices = "offlineSlimmedPrimaryVertices"
   getattr(process, 'patJetCorrFactorsAK4PFCHSLeg' + label).primaryVertices = "offlineSlimmedPrimaryVertices"
   
-  if not hasattr(process,"QGPoolDBESSource"):
-    process.QGPoolDBESSource = cms.ESSource("PoolDBESSource",
-                                            CondDBSetup,
-                                            toGet = cms.VPSet(),
-                                            connect = cms.string('sqlite:QGL_'+qgDatabaseVersion+'.db') 
-                                            )
-    process.es_prefer_qg = cms.ESPrefer('PoolDBESSource','QGPoolDBESSource')
+  #== QGTagging, will be removed in 76X via customization
+  process.QGPoolDBESSource = cms.ESSource("PoolDBESSource",
+                                          CondDBSetup,
+                                          toGet = cms.VPSet(),
+                                          connect = cms.string('frontier://FrontierProd/CMS_COND_PAT_000'),)
   
-  for type in ['AK4PFchs']:#,'AK4PFchs_antib']:
+  for type in ['AK4PFchs','AK4PFchs_antib']:
     process.QGPoolDBESSource.toGet.extend(cms.VPSet(cms.PSet(
           record = cms.string('QGLikelihoodRcd'),
           tag    = cms.string('QGLikelihoodObject_'+qgDatabaseVersion+'_'+type),
@@ -111,11 +108,7 @@ def addFlashggPFCHSJets(process,
           )))
   
   from RecoJets.JetProducers.QGTagger_cfi import QGTagger
-  setattr( process, 'QGTaggerPFCHS' + label,  
-           QGTagger.clone( srcJets   = 'patJetsAK4PFCHSLeg' + label ,jetsLabel = 'QGL_AK4PFchs', vertexIndex = cms.uint32(vertexIndex),
-                           srcVertexCollection = 'offlineSlimmedPrimaryVertices'))
-
-  from RecoJets.JetProducers.PileupJetIDParams_cfi import full_80x_chs
+  setattr( process, 'QGTaggerPFCHS' + label,  QGTagger.clone( srcJets   = 'patJetsAK4PFCHSLeg' + label ,jetsLabel = 'QGL_AK4PFchs'))
   
   flashggJets = cms.EDProducer('FlashggJetProducer',
                                DiPhotonTag = cms.InputTag('flashggDiPhotons'),
@@ -123,11 +116,7 @@ def addFlashggPFCHSJets(process,
                                JetTag      = cms.InputTag('patJetsAK4PFCHSLeg' + label),
                                VertexCandidateMapTag = cms.InputTag("flashggVertexMapForCHS"),
                                qgVariablesInputTag   = cms.InputTag('QGTaggerPFCHS'+label, 'qgLikelihood'),
-                               ComputeSimpleRMS = cms.bool(True),
-                               PileupJetIdParameters = full_80x_chs,
-                               rho     = cms.InputTag("fixedGridRhoFastjetAll"),
-                               JetCollectionIndex = cms.uint32(vertexIndex),
-                               Debug = cms.untracked.bool(False)
+                               ComputeSimpleRMS = cms.bool(True)
                                )
   setattr( process, 'flashggPFCHSJets'+ label, flashggJets)
 

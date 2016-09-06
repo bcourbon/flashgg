@@ -21,7 +21,6 @@ namespace flashgg {
         float leadeta;
         float subleadeta;
         float sigmarv;
-        float decorrSigmarv;
         float sigmawv;
         float CosPhi;
         float vtxprob;

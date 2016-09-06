@@ -43,7 +43,7 @@ class BatchRegistry:
             raise Exception,"Could not automatically determine the batchSystem for domain %s. Please specify it manually.\n Known domains are: %s\n" % ( domain, " ".join(BatchRegistry.domains_map.keys()) )
         ret = BatchRegistry.domains_map[domain]
         if BatchRegistry.autoprint:
-            print( "\nINFO: We are at '%s', so we will use '%s' as batch system.\n     Please specify the batch system on the command line if you are not happy with this." % (domain,ret) )
+            print( "\nINFO: We are at '%s', so we will use '%s' as bacth system.\n     Please specify the batch system on the command line if you are not happy with this." % (domain,ret) )
             BatchRegistry.autoprint = False
         return ret
     
@@ -53,7 +53,6 @@ class BatchRegistry:
         if batchSystem == "auto": batchSystem = BatchRegistry.getBatchSystem(BatchRegistry.getDomain())        
         if batchSystem == "lsf" : return LsfMonitor
         elif batchSystem == "sge": return SGEMonitor
-        elif batchSystem == "iclust": return IclustMonitor
         else:
             raise Exception,"Unrecognized batchSystem: %s" % batchSystem
 
@@ -574,21 +573,9 @@ class SGEJob(LsfJob):
         
     def run(self,script):
 
-        mydomain = BatchRegistry.getDomain()
-
-        if mydomain == "hep.ph.ic.ac.uk":
-            qsubCmdParts = [ "qsub", "-q hep.q" ]
-            if self.lsfQueue == "hepshort.q":
-                qsubCmdParts.append("-l h_rt=3:0:0")
-            elif self.lsfQueue == "hepmedium.q":
-                qsubCmdParts.append("-l h_rt=6:0:0")
-            else:
-                # assume long queue is intended
-                qsubCmdParts.append("-l h_rt=48:0:0")
-        else:
-            qsubCmdParts = [ "qsub",
-                             "-q " + self.lsfQueue,
-                             ]
+        qsubCmdParts = [ "qsub",
+                         "-q " + self.lsfQueue,
+                         ]
 
         if not self.async:
             qsubCmdParts.append("-sync y")  # qsub waits until job completes
@@ -637,19 +624,6 @@ class SGEJob(LsfJob):
 
         if self.async:
             result = commands.getstatusoutput("qstat")
-            checkcount = 0
-            while len(result[1].split("\n")) < 3:
-                print "SGE REBOOT MITIGATION: qstat result seems too short"
-                print "---------------------------------------------------"
-                print result[1]
-                print "---------------------------------------------------"
-                print "... so we wait before trying again"
-                sleep(5.)
-                result = commands.getstatusoutput("qstat")
-                checkcount += 1
-                if checkcount > 12:
-                    break
-                
 #                print "We are in handleOutput and we have the following output:",result
             self.exitStatus = 0 # assume it is done unless listed
             for line in result[1].split("\n"):
@@ -742,24 +716,13 @@ class IclustJob(LsfJob):
         #if self.async:
         #    return self.exitStatus, (out,(self.jobName,self.jobid))
 
-        return self.handleOutput()
+        #return self.handleOutput()
+        return
 
     def handleOutput(self):
 
         if self.async:
             result = commands.getstatusoutput("qstat")
-            checkcount = 0
-            while len(result[1].split("\n")) < 3:
-                print "SGE REBOOT MITIGATION: qstat result seems too short"
-                print "---------------------------------------------------"
-                print result[1]
-                print "---------------------------------------------------"
-                print "... so we wait before trying again"
-                sleep(5.)
-                result = commands.getstatusoutput("qstat")
-                checkcount += 1
-                if checkcount > 12:
-                    break
 #                print "We are in handleOutput and we have the following output:",result
             self.exitStatus = 0 # assume it is done unless listed
             for line in result[1].split("\n"):
@@ -809,44 +772,12 @@ class SGEMonitor(LsfMonitor):
 
     def monitor(self):
         status = commands.getstatusoutput("qstat")
-        checkcount = 0
-        while len(status[1].split("\n")) < 3:
-            print "SGE REBOOT MITIGATION: qstat result seems too short"
-            print "---------------------------------------------------"
-            print status[1]
-            print "---------------------------------------------------"
-            print "... so we wait before trying again"
-            sleep(5.)
-            status = commands.getstatusoutput("qstat")
-            checkcount += 1
-            if checkcount > 12:
-                break
         jobids = []
         statuses = []
         for line in status[1].split("\n")[2:]:
             toks = line.split()
             jobids.append(toks[0])
             statuses.append(toks[2])
-            #                print "DEBUG jobid jobids",jobid,jobids[0]
-            #                print type(jobid),type(jobids[0])
-            #                print
-            #                print jobs
-        for jobid in self.jobsmap.keys():
-            if not jobids.count(jobid):
-                # i.e. job is no longer on the list, and hence done
-                self.jobFinished(jobid,None)
-                    
-# -----------------------------------------------------------------------------------------------------
-class IclustMonitor(LsfMonitor):
-
-    def monitor(self):
-        status = commands.getstatusoutput("qstat")
-        jobids = []
-        statuses = []
-        for line in status[1].split("\n")[2:]:
-            toks = line.split()
-            jobids.append(toks[0])
-            statuses.append(toks[4])
             #                print "DEBUG jobid jobids",jobid,jobids[0]
             #                print type(jobid),type(jobids[0])
             #                print

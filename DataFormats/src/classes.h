@@ -8,7 +8,6 @@
 #include "flashgg/DataFormats/interface/DiPhotonCandidate.h"
 #include "flashgg/DataFormats/interface/DiPhotonMVAResult.h"
 #include "flashgg/DataFormats/interface/UntaggedTag.h"
-#include "flashgg/DataFormats/interface/SigmaMpTTag.h"
 #include "flashgg/DataFormats/interface/Electron.h"
 #include "flashgg/DataFormats/interface/Muon.h"
 #include "flashgg/DataFormats/interface/GenPhotonExtra.h"
@@ -33,7 +32,6 @@
 #include "flashgg/DataFormats/interface/WeightedObject.h"
 #include "flashgg/DataFormats/interface/PDFWeightObject.h"
 #include "flashgg/DataFormats/interface/ZPlusJetTag.h"
-#include "flashgg/DataFormats/interface/TagCandidate.h"
 
 #include <vector>
 #include <map>
@@ -180,10 +178,6 @@ namespace  {
         std::vector<flashgg::UntaggedTag> vec_untaggedcat;
         edm::Wrapper<std::vector<flashgg::UntaggedTag> > wrp_vec_untaggedcat;
 
-        flashgg::SigmaMpTTag sigmamptcat;
-        std::vector<flashgg::SigmaMpTTag> vec_sigmamptcat;
-        edm::Wrapper<std::vector<flashgg::SigmaMpTTag> > wrp_vec_sigmamptcat;
-
         flashgg::VBFTag vbf_cat;
         std::vector<flashgg::VBFTag> vec_vbf_cat;
         edm::Wrapper<std::vector<flashgg::VBFTag> > wrp_vec_vbf_cat;
@@ -265,10 +259,7 @@ namespace  {
         std::vector<edm::Ptr<flashgg::PhotonJetCandidate> >        vec_ptr_fgj_dip;
         edm::Wrapper<std::vector<edm::Ptr<flashgg::PhotonJetCandidate> > >   wrp_vec_ptr_fgj_dip;
 
-        flashgg::TagCandidate                                        tags;
-        edm::Wrapper<flashgg::TagCandidate>                      wrp_tags;
-        std::vector<flashgg::TagCandidate>                       vec_tags;
-        edm::Wrapper<std::vector<flashgg::TagCandidate> >    wrp_vec_tags;
+
     };
 }
 // Local Variables:

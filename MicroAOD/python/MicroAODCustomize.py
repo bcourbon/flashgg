@@ -123,8 +123,6 @@ class MicroAODCustomize(object):
             self.customizeTiming(process)
         if os.environ["CMSSW_VERSION"].count("CMSSW_7_6"):
             self.customize76X(process)
-        elif os.environ["CMSSW_VERSION"].count("CMSSW_8_0"):
-            self.customize80X(process)
         elif len(self.globalTag) == 0:
             self.globalTag = "74X_mcRun2_asymptotic_v4"
             self.customizeGlobalTag(process)
@@ -138,26 +136,21 @@ class MicroAODCustomize(object):
     # signal specific customization
     def customizeSignal(self,process):
         process.flashggGenPhotonsExtra.defaultType = 1
-        from flashgg.MicroAOD.flashggMETs_cff import runMETs
-        runMETs(process,True) #isMC
+
         # Default should be the right name for all signals
         process.load("flashgg/MicroAOD/flashggPDFWeightObject_cfi")
         process.p *= process.flashggPDFWeightObject
 
     # background specific customization
     def customizeBackground(self,process):
-        from flashgg.MicroAOD.flashggMETs_cff import runMETs
-        runMETs(process,True) #isMC
         if "sherpa" in self.datasetName:
             process.flashggGenPhotonsExtra.defaultType = 1
-            
+
             
     # data specific customization
     def customizeData(self,process):
         ## remove MC-specific modules
         modules = process.flashggMicroAODGenSequence.moduleNames()
-        from flashgg.MicroAOD.flashggMETs_cff import runMETs
-        runMETs(process,False) #!isMC
         for pathName in process.paths:
             path = getattr(process,pathName)
             for mod in modules:
@@ -313,10 +306,6 @@ class MicroAODCustomize(object):
 
     def customize76X(self,process):
         delattr(process,"QGPoolDBESSource")
-
-    def customize80X(self,process):
-        pass
-#        delattr(process,"QGPoolDBESSource")
 
 # customization object
 customize = MicroAODCustomize()

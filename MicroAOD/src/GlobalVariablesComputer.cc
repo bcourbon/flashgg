@@ -148,9 +148,7 @@ namespace flashgg {
         if( doVtx_ ) {
             cache_.nvtx = vertices->size();
         }
-
-        cache_.puweight = 1.;
-
+        
         if( ! evt.isRealData() && getPu_ ) {
             double truePu=0., obsPu=0.;
             for( auto & frame : *puInfo ) {
@@ -169,7 +167,7 @@ namespace flashgg {
                     int ibin = (std::lower_bound(puBins_.begin(), puBins_.end(), cache_.npu) - puBins_.begin()) -1;
                     cache_.puweight = puWeight_[ibin];
                 }
-            } 
+            }
         }
 
     }

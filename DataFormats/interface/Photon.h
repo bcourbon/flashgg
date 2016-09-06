@@ -63,7 +63,6 @@ namespace flashgg {
         void setPhoIdMvaWrtVtx( edm::Ptr<reco::Vertex> key, float val ) { phoIdMvaD_[key] = val; } // For later updates, e.g. recomputation when vertex is already selected
         void updateEnergy( std::string key, float val );
         void shiftAllMvaValuesBy( float val );
-        void shiftMvaValueBy( float val, edm::Ptr<reco::Vertex> vtx );
         void shiftSigmaEOverEValueBy( float val );
         void smearSigmaEOverEValueBy( float val );
         //    void setSigEOverE(float val) { sigEOverE_ = val; };
@@ -162,7 +161,6 @@ namespace flashgg {
         void setStatusFlags( int32_t st) { return addUserInt("rechitStatus",st); };
         int32_t statusFlags() { return  (hasUserInt("rechitStatus")?userInt("rechitStatus"):-1); };
         bool checkStatusFlag( rechitSummaryFlags_t ibit) const { return (hasUserInt("rechitStatus")?userInt("rechitStatus")&(0x1<<ibit):0); };
-        reco::SuperCluster* getSuperCluster() { return &superCluster_[0];};
 
     private:
         void setEnergyAtStep( std::string key, float val ); // updateEnergy should be used from outside the class to access this
@@ -172,8 +170,8 @@ namespace flashgg {
 
         float sipip_;
         float sieip_;
-        //float zernike20_;
-        //float zernike42_;
+        //        float zernike20_;
+        //        float zernike42_;
         float e2nd_;
         float e2x5right_;
         float e2x5left_;

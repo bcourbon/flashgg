@@ -2,8 +2,6 @@
 
 EDM_REGISTER_PLUGINFACTORY( FlashggSystematicPhotonMethodsFactory,
                             "SystematicPhotonMethodsFactory" );
-EDM_REGISTER_PLUGINFACTORY( FlashggSystematicSinglePhotonViewMethodsFactory,
-                            "SystematicSinglePhotonViewMethodsFactory" );
 EDM_REGISTER_PLUGINFACTORY( FlashggSystematicDiPhotonMethodsFactory,
                             "SystematicDiPhotonMethodsFactory" );
 EDM_REGISTER_PLUGINFACTORY( FlashggSystematicPhotonMethodsFactory2D,

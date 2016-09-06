@@ -330,7 +330,7 @@ namespace flashgg {
             for (unsigned int i =0; i < dumper.second.size() ; i++){
               if (dumper.second[i].isBinnedOnly()) continue;
               else {
-                if (ws_ != NULL) dumper.second[i].compressPdfWeightDatasets(ws_); 
+                dumper.second[i].compressPdfWeightDatasets(ws_); 
               }
             }
            }

@@ -8,13 +8,13 @@ from flashgg.MetaData.samples_utils import SamplesManager
 process = cms.Process("FWLitePlots")
 
 process.source = cms.Source("PoolSource",
-                            fileNames=cms.untracked.vstring("file:myMicroAODOutputFile.root")
+                            fileNames=cms.untracked.vstring("file:myMicroAODOutputFile_GJet40-80.root")
 )
 
 process.fwliteInput = cms.PSet(
-    fileNames = cms.vstring("file:myMicroAODOutputFile.root"),
-    maxEvents   = cms.int32(100),
-    outputEvery = cms.uint32(10),
+    fileNames = cms.vstring("file:myMicroAODOutputFile_GJet40-80.root"),
+    maxEvents   = cms.int32(-1),
+    outputEvery = cms.uint32(10000),
 )
 
 
@@ -65,10 +65,9 @@ cfgTools.addCategories(process.analyzer,
                                    ]
                        )
 
-
 # customization for job splitting, lumi weighting, etc.
 from flashgg.MetaData.JobConfig import customize
-customize.setDefault("maxEvents",500)
+customize.setDefault("maxEvents",-1)
 customize.setDefault("targetLumi",1.e+4)
 customize(process)
 

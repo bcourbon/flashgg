@@ -20,7 +20,7 @@ namespace flashgg {
         void setWeight( string key, float val );
         void setCentralWeight( float val ) { setWeight( central_key, val ); }
         bool hasWeight( string key ) const;
-        void includeWeights( const WeightedObject &other, bool usecentralifnotfound = true );
+        void includeWeights( const WeightedObject &other );
         vector<string>::const_iterator weightListBegin() const { return _labels.begin(); }
         vector<string>::const_iterator weightListEnd() const { return _labels.end(); }
 
